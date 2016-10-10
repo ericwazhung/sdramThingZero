@@ -1,0 +1,51 @@
+I've never worked with DRAM, myself (as opposed to SDRAM), but I think
+there are some important differences that probably need to be considered...
+E.G. SDRAM has a "mode-register" which requires configuring... Also, SDRAM
+has *bursts*. As far as I'm aware, DRAM couldn't possibly have bursts,
+since there'd be no clock to burst-with...(unless maybe strobing a pin?).
+AND... Since it's synchronous, it requires (some) instructions to be only a
+single-clock-width (otherwise, it would come through as the same
+instruction being accessed multiple times).
+
+Was about to write, earlier, about another factor of SDRAM that makes it
+sorta hacker-friendly (as opposed to some of the newer ones, like DDR)...
+Even though a typical "read" instruction (e.g.) only outputs its data for
+*one* clock-width, *multiple* read-instructions can be executed
+back-to-back. So, say you set up your command/instruction pins to execute a
+read-instruction at a certain address... And, say, you happen to leave
+those command and address pins at that value for *several* SDRAM
+clock-cycles... THEN, the result is that the SDRAM outputs data from that
+address *for* *several* SDRAM clock-cycles. So, say, you set up the
+command/address pins, then you've got as much time as you want to read-back
+the output-value.
+
+In a sense, it's kinda like bypassing the synchronous/state-machine aspect
+of the SDRAM, making it look more like, say, an SRAM or EEPROM (or maybe a
+DRAM?).
+
+Writes are similar. 
+
+BUT, again, there are certain instructions which *cannot* be executed
+repeatedly back-to-back, and those need to be considered. My trick, when
+the AVR's running on the same clock as the SDRAM, was to set up all the
+address/command (and data, if applicable) pins initially, but with
+/CS=High=Off ("COMMAND INHIBIT" ~= NOP). Then, for one clock-cycle, strobe
+/CS=Low. In the AVR-realm, this MUST be executed as two "PORT =
+(constant);" statements, otherwise it might try to use sbi/cbi, which are
+*two* cycles, each. Better, still, is to use Assembly for *just* the /CS
+strobe, since sometimes C will reorder things (and, actually, did *quite a
+bit* in my earlier sdramThing versions).
+
+
+TinyVGA would probably be easier to interface with a *parallel-interfaced*
+LCD, indeed. I think it's still a hack... Most actual GPUs, etc. would
+read-back from the memory and route that out to the video-port... The GPU,
+then, being responsible for the pixel timing and addressing. Whereas, here,
+you're actually using the SDRAM's built-in counters to handle pixel-timing
+and pixel-addressing... 
+
+"Free-Running," when used with an LCD, just takes it a step-further and
+allows the SDRAM to tell itself to output the next row automatically. (Or,
+in the case of the FPD-Link LCD I used, it outputs 7 bits per pixel
+*sequentially*, so the SDRAM must tell itself to "burst" the next
+1024-"column" memory-page several times for each graphical row).

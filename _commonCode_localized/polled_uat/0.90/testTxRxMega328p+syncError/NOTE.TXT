@@ -1,0 +1,43 @@
+Apparently the heartbeat takes quite a bit more time in its update-function
+than it should... Sometimes when sending a string, data becomes corrupt...
+e.g.
+> echo "asdfasdfasdf" > /dev/ttyUSB0
+may come through incorrectly...
+
+Adding "HEART_REMOVED = TRUE" to the makefile is a *quick* test, which
+renders every piece of heartbeat-related code inactive...
+(Thus, the function-calls can remain, but they do nothing and occupy no CPU
+ time)
+
+This is a mixed-blessing. On the one hand, I should probably improve the
+heartbeat code such that it doesn't spend so much time in heart_update()
+On the other hand, it's nice to have it as a quick-fix for moments like
+these. 
+
+E.G. The initial-guess was that corrupted-data was due to the bitrate being
+inacurate due to integer-math... but having run said math, it turns out
+that the error is less than 1%. What else could it be...?
+Something's taking too long in the main loop... Oh, that blasted Heart.
+Duh. Quick-Fix: "HEART_REMOVED = TRUE" --> 'makefile'
+
+Yep.
+
+Likewise, the heartbeat code is actually quite large. Nearly 1KB as I
+recall... When working with small devices, this is a nice feature... As
+soon as that code-size becomes too large for the program-space, it's easy
+to add "HEART_REMOVED" and suddenly gain a *whole lotta space*.
+
+Maybe I'm just looking for reasons to not change heartbeat.
+
+(Actually, it's more complicated than this... heartbeat has multiple
+ implementations; one uses the 'DMS timer', another uses *just* the
+ tcnter... dmsTimer adds quite a bit of code. So it's not exactly the
+ heartbeat's fault. Most functions that can be handled by the dmsTimer can
+ *also* be handled by the tcnter, which is, nowadays, even more commonly 
+ used than the dmsTimer, and also smaller and faster and doesn't require an
+ interrupt.
+ In fact, heartbeat uses (and therefore *makes available*) *quite a few* 
+ commonThings that are quite common, but may otherwise be unnecessary in 
+ your project. e.g. hfModulation, dmsTimer/tcnter, timerCommon, etc.
+ Check out commonCode[localized]/heartbeat/... for more information.
+)

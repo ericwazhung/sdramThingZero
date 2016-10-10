@@ -1,0 +1,69 @@
+(Parity bits -> 40bits...?)
+(Byte5, currently with free-runner, CS could be pin-popped for 48-bits)
+
+
+/home/meh/_avrProjects/sdramThing4.0/14-wdtClockDeterminator/SDRAM_Pinout4.txt
+
+ALSO: .../15-LOOKING_INTO_sdramThingZero
+
+TODO:
+   Why is sT4.5 at HaD.io, but only 4.0 listed here...?!
+   Which is the latest version of sdrfr...? 4.00ncf or 4.00ncf4?
+      See 4.00ncf4/sdrfr.h for some notes... also ./makefile
+      Do those experiments still need consideration?
+
+
+
+CKE:
+   Currently, it seems, CKE is ONLY used during sdrfr_init()
+      It *is* used, there...
+   Table 17 (?)
+      "All other modes are reserved or invalid"
+      "Power-Down occurs if CKE is registered LOW coincident with a NOP or
+         COMMAND INHIBIT when no accesses are in progress"
+         --Wasn't listed in the table...(?)
+      "Power-Down is exitted by registering a NOP or COMMAND INHIBIT with
+         CKE HIGH at the desired clock edge"
+      "Power-Down deactivates the input and output buffers"
+         Refresh times must be met (does not auto-refresh!)
+
+
+
+IT SEEMS:
+   CKE1/0 available at DIMM
+      Yet, only 0 is used.......?
+         (DIMM-specific?)
+      Appears to be related to the number of "Rows" of 64-bit memory-groups
+      Probably best to treat them the same... since most won't have two.
+
+
+TRIGGERING:
+   How to know when to *stop* sampling...?
+      A) last 'page' doesn't jump back to the start... Free-Running stops
+         Does Not allow for circular-buffering
+            Relies on trigger-source accuracy...
+               Trigger must occur starting at first-page
+               (minor circular-buffer at the beginning?)
+                  PAPAPAPAPAPA---overall-refresh
+                  A couple bits indicate which page we're FR-looping in
+                     Read-back prior to trigger
+                        to know where to start read-back of pretrigger data
+                  Override next FR-jump-address to linear (post-trigger)
+                     pages... don't jump-back at the end of sampling.
+      B) circular+timer-interrupt... kinda hokey, but not bad....
+         Might need to track starting-page, again, would require more bits
+
+
+PINS:
+   Might need to read-back some address-bits 
+      (e.g. circular pre-trigger)
+      (FR-instruction write-verification...?)
+
+
+
+
+IDEAS:
+   Load one page
+      replicate      Rue Mohr's comment
+   Pulse-View software...?
+

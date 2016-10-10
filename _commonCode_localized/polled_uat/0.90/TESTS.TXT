@@ -1,0 +1,22 @@
+This has so many old tests I can't even recall what they all do.
+So far, in piecing things together, I know this much: 
+
+There are two main types of tests here, one that ONLY handle's the UAT, and
+one that handles BOTH the UAT and UAR (a full-duplex UART)
+The UART/'TxRx' tests haven't been worked-with lately, except on the
+Mega328p.
+
+The Mega328p tests (and testDesktop) are the latest, as of this writing.
+
+'testDesktop' runs a simulation on your desktop PC
+'testMega328p' is a copy-job from 'testTiny84' and modified (and likely
+      improved) for the ATmega328p
+'testTxRxMega328p' was modified from 'testMega328p' to copy-over
+		full-duplex (transmit AND receive) functionality from 'testAVR'
+
+'testAVR' is probably the first AVR test I wrote, since I didn't note which
+      chip it was for, and is probably outdated.
+
+
+If trying an AVR device, try 'testMega328p' and modify to your chip's needs
+

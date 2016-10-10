@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# This is taken almost directly from kinsamanka at github.com:
+#https://github.com/kinsamanka/PICnc-V2/wiki/OpenOCD-PIC32-Programmer
+
+# His file was called pic32openocd
+
+#TODO: I need to make sure to check his opensource licensing requests!
+
+
+#TODO: Also need to look into making this device (not board) selectable...
+#      e.g. via MCU...?
+#      (currently I'm using a custom board.cfg)
+
+#BRD_CFG=pic32mx150f128b.cfg
+
+
+#echo \$TRST_GPIO > /sys/class/gpio/unexport 2>/dev/null
+#echo \$TRST_GPIO > /sys/class/gpio/export
+#echo "low" > /sys/class/gpio/gpio\${TRST_GPIO}/direction
+#echo  "1" > /sys/class/gpio/gpio\${TRST_GPIO}/active_low
+
+#openocd  -f interface/rpi.cfg -f board/\${BRD_CFG} &
+
+# Run openocd, but keep the script running... ('&')
+# adapter_khz was 4000 before, but always fell back to non-bulk write...
+#  (with default openOCD0.90)
+#  taking nearly 10 minutes / write!
+# adapter_khz 400 says falling back to non-bulk write, but:
+#  BUG: register 'a0' not found
+# (weird?)
+# A hacked version of openOCD-0.90 is installed, now...
+#  It fast-writes *REALLY FAST*
+# See MIPS_ETC/_PIC32_firstGo/openOCD/openOCD-0.90_hacked/
+# (OR was it not actually flashing??? per heartbeatTest/4
+#  reattempted -1, flickers again... definitely flashing...)
+
+calledAs="$0"
+calledAsDir="$(dirname "$0")"
+
+
+echo "Entering telnet session to openOCD->PIC32 ($1)"
+echo "<Type 'shutdown' to exit>"
+openocd -f $calledAsDir/openOCDscripts/myFlyswatter.cfg -c "adapter_khz 400" -f $calledAsDir/openOCDscripts/PIC${1}.cfg > /dev/null 2>&1 &
+
+sleep 1
+
+telnet localhost 4444
+
+# It appears that nc keeps running until the exit command (in program) is
+# executed, which causes the 'telnet' connection to drop *and* exits
+# openOCD...
+# So... I don't know, off-hand, how to use the same openocd session to
+# *resume*...
+

@@ -1,0 +1,11 @@
+Strange: (?)
+	One DIMM (PC100, 16x64) Has CS0 and CS2 tied together
+	(How can this even function in a normal PC?!)
+	(Backside, unpopulated shorts CS1 and CS3!)
+	NOT COMPATIBLE WITH SDRAMTHING
+	(Note: found a motherboard which also shorts these)
+
+Strange: (?)
+	One DIMM (16x64, 16 chips) uses ONLY CS0 and CS2
+	despite two-sided (could be x4 chips?)
+

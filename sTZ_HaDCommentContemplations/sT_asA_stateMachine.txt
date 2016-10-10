@@ -1,0 +1,92 @@
+Ray Moore: re: "isn't this called a state-machine?"
+-----------
+
+first: "plateaued" because, we're looking not at an y(x) function, here,
+but a y(t)... Having reached said "peak" in y(x), we've now turned that
+"peak" into a plateau in y(t)... (In other words, I don't get whose bubble
+we're worried about, but JWhitten's response definitely led me to believe I
+was missing something... so, yes, 'piqued' of the first-definition has
+turned maybe to 'piqued' in the second-definition...).
+
+--------------------------
+
+Ray: the ol' "State-Machine" **definition** is something I didn't really
+grasp in my studies... It seems to me like, at the basic level, nearly
+*everything* is a state-machine. Even something so simple as a single
+variable, or single byte in memory, is a state-machine... It has a state,
+its value. Its state can be changed by writing another value... Its state
+can be incremented, by adding 1, etc... Then there's a "bigger"
+state-machine that is responsible for doing whatever is to be done to that
+variable's state... Say incrementing, or decrementing, if it's a counter.
+Then you can go from there and say that the Processor (CPU) has states of
+its own which controls the state of the thing being done to that variable's
+state. The CPU, depending on its state, chooses whether to use the
+"counter" state, or the "addition" state, or the "subtraction" or "copy",
+or many others... Then, of course, the CPU runs an application (or
+gazillions of them, each of) which has states of its own... So, then it's a
+matter of what level of state-machine are we talking about...? Oh, we could
+go further down the "smaller-state-machine" path and look at that variable
+as a combination of bits, each of which has states of their own... So the
+8-bit variable has 256 states of its own, and each of the 8-bits within the
+variable has 2 states of their own...
+
+So, I guess the question is... "isn't *what* called a state-machine?"
+
+So, answering your question's a bit difficult for me, but here I'll try. 
+
+If the question is whether SDRAM (Synchronous Dynamic RAM) is a
+state-machine, then yes... internally it is definitely a state-machine...
+That's what makes this possible. In fact, the datasheets for some SDRAM
+chips show several state-diagrams. (Further, there are several separate
+state-machines that can run simultaneously, or rather, be switched-between,
+within the SDRAM). This, in comparison to, say, SRAM (here, S="Static", not
+"Synchronous", Static != Dynamic) which, on the black-box-level looks quite
+a bit more like a *really complex* logic-gate/function... (when reading).
+SRAM inputs *directly* cause outputs, no "states", really, to step/iterate
+between. (well, maybe the "states" of "read" and "write"... This is all my
+interpretation, anyhow.) 
+
+If the question is whether sdramThing is a state-machine, then, sure... At
+some point, *it seems to me*, nearly anything machine-wise beyond, say,
+mathematical-functions or logical-operators (e.g. if it has a latch
+somewhere) is a state-machine or combination of several... 
+
+sdramThing4.5, as a "logic-analyzer" (at the highest-level, I suppose),
+switches between two states of "sample" and "repeat". In the "sample"
+state, it takes data in, in the "repeat" state, it spits that data back
+out. The microcontroller can force it into several other states, such as
+"windowed-repeat" and LCD-refresh (which is just a single 'repeat' of the
+*entire* contents). Then there are states of whether to do each of those
+states only once, or do them several times back-to-back. (And the
+microcontroller has several states of its own for e.g. loading the SDRAM
+with its commands, or moving the cursors around).
+
+You can take it a step further and say that the "Free-Runner" has several
+internal states of its own, which are minor extensions(?) of/to the SDRAM's
+built-in internal state-machine... E.G. SDRAM has a "Burst-Read"
+mode/state... You start a "read" operation, and it outputs up to 1024
+bytes/words (called a page), in sequence. Once that burst finishes
+outputting all 1024 bytes/words, the SDRAM *typically* (from its internal
+state-machine) would stop executing the burst and return to the
+IDLE/No-Operation state. 
+
+But, in the case of sdramThing, the data being output feeds back to its
+command-inputs... AND, (essentially) the *very last* data in every page
+contains a command to start a *new* burst at the *following* page. So,
+whereas the SDRAM itself is limited to a "read-burst" state that exits on
+its own after outputting one single page, sdramThing is capable of an
+entirely new extended(?)-state that outputs the entire RAM contents *by*
+essentially repeatedly executing the SDRAM's "burst-read" state, from
+different page-locations. 
+
+Other states could definitely be implemented, there's all sorts of
+discussion here about it. 
+E.G. I've thought about having a "NOP" state, in free-running, that loops
+through several (but not all) pages, as described earlier, but it will
+simultaneously *also* execute "page-open" and "page-close" states on the
+*other* pages (the ones *not* currently being burst). Doing this will allow
+for the refreshing those otherwise-unused pages, since refreshing is
+necessary for dynamic-RAMs.
+
+I think I've probably taken this one a bit too far off-course... did I
+answer the question?
